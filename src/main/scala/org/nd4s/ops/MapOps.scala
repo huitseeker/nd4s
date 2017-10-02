@@ -3,6 +3,9 @@ package org.nd4s.ops
 import org.nd4j.linalg.api.complex.IComplexNumber
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.api.ops.{BaseScalarOp, BaseOp, Op}
+import org.nd4j.autodiff.functions.DifferentialFunction
+import org.nd4j.autodiff.ArrayField
+import java.util.{List => JList}
 import org.nd4s.Implicits._
 
 object MapOps{
@@ -27,4 +30,9 @@ class MapOps(_x:INDArray,f:Double => Double, g:IComplexNumber => IComplexNumber)
   override def op(origin: Float): Float = f(origin).toFloat
 
   override def op(origin: IComplexNumber): IComplexNumber = g(origin)
+
+  def doGetValue(): ArrayField = null
+
+  def doDiff(l: JList[DifferentialFunction]): JList[DifferentialFunction] = null
+
 }

@@ -4,6 +4,9 @@ import org.nd4j.linalg.api.complex.IComplexNumber
 import org.nd4j.linalg.api.ndarray.INDArray
 import org.nd4j.linalg.api.ops.{BaseScalarOp, Op}
 import org.nd4j.linalg.factory.Nd4j
+import org.nd4j.autodiff.functions.DifferentialFunction
+import org.nd4j.autodiff.ArrayField
+import java.util.{List => JList}
 import org.nd4s.Implicits._
 
 object FilterOps{
@@ -28,4 +31,9 @@ class FilterOps(_x:INDArray,len:Int,f:Double => Boolean, g:IComplexNumber => Boo
   override def op(origin: Float): Float = if(f(origin)) origin else 0
 
   override def op(origin: IComplexNumber): IComplexNumber = if(g(origin)) origin else Nd4j.createComplexNumber(0, 0)
+
+  def doGetValue(): ArrayField = null
+
+  def doDiff(l: JList[DifferentialFunction]): JList[DifferentialFunction] = null
+
 }
