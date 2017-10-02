@@ -1,7 +1,7 @@
 lazy val currentVersion = SettingKey[String]("currentVersion")
 lazy val nd4jVersion = SettingKey[String]("nd4jVersion")
 lazy val publishSomeThing = sys.props.getOrElse("repoType", default = "local").toLowerCase match {
-  case repoType if repoType.contains("nexus") => publisNexus
+  case repoType if repoType.contains("nexus") => publishNexus
   case repoType if repoType.contains("jfrog") => publishJfrog
   case repoType if repoType.contains("bintray") => publishBintray
   case repoType if repoType.contains("sonatype") => publishSonatype
@@ -22,12 +22,14 @@ lazy val commonSettings = Seq(
   version := sys.props.getOrElse("currentVersion", default = "0.9.2-SNAPSHOT"),
   organization := "org.nd4j",
   resolvers += Resolver.mavenLocal,
-  resolvers in ThisBuild ++= Seq(Opts.resolver.sonatypeSnapshots),
+  resolvers in ThisBuild ++= Seq(
+    Opts.resolver.sonatypeSnapshots
+  ),
   nd4jVersion := sys.props.getOrElse("nd4jVersion", default = "0.9.2-SNAPSHOT"),
   libraryDependencies ++= Seq(
     "com.nativelibs4java" %% "scalaxy-loops" % "0.3.4",
-    "org.nd4j" % "nd4j-api" % nd4jVersion.value,
-    "org.nd4j" % "nd4j-native-platform" % nd4jVersion.value % Test,
+    "org.nd4j" % "nd4j-api" % nd4jVersion.value changing(),
+    "org.nd4j" % "nd4j-native-platform" % nd4jVersion.value % Test changing(),
     "org.scalatest" %% "scalatest" % "2.2.6" % Test,
     "ch.qos.logback" % "logback-classic" % "1.2.1" % Test,
     "org.scalacheck" %% "scalacheck" % "1.12.5" % Test,
@@ -74,9 +76,9 @@ lazy val commonSettings = Seq(
   initialCommands in console := "import org.nd4j.linalg.factory.Nd4j; import org.nd4s.Implicits._"
 )
 
-lazy val publisNexus = Seq(
+lazy val publishNexus = Seq(
   publishTo := {
-    val nexus = "http://master-jenkins.skymind.io:8088/nexus/"
+    val nexus = "http://master-jenkins.skymind.io:8088//"
     if (isSnapshot.value)
       Some("snapshots" at nexus + "content/repositories/snapshots")
     else
