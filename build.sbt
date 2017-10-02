@@ -15,6 +15,25 @@ lazy val releaseRepositoryId = sys.props.getOrElse("stageRepoId", default = "dep
   case _ => "deployByRepositoryId/" + nexusStagingRepoId
 }
 
+ivyConfigurations += config("publishing").hide
+
+val nd4jClassifier = {
+  val os = System.getProperty("os.name").toLowerCase
+  val buildOs = os match {
+    case "mac os x" => "macosx"
+    case _ => os
+  }
+
+  val arch = System.getProperty("os.arch").toLowerCase
+  val iarches = "i[3-6]86".r
+  val x86stg = "x86(-64)".r
+  val buildArch = arch match {
+    case "amd64" | iarches() | x86stg() => "x86_64"
+    case _ => arch
+  }
+  s"$buildOs-$buildArch"
+}
+
 lazy val commonSettings = Seq(
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.10.6", "2.11.8"),
@@ -26,12 +45,13 @@ lazy val commonSettings = Seq(
     Opts.resolver.sonatypeSnapshots
   ),
   nd4jVersion := sys.props.getOrElse("nd4jVersion", default = "0.9.2-SNAPSHOT"),
+  libraryDependencies += "org.nd4j" % "nd4j-native" % nd4jVersion.value % "publishing",
   libraryDependencies ++= Seq(
     "com.nativelibs4java" %% "scalaxy-loops" % "0.3.4",
-    "org.nd4j" % "nd4j-api" % nd4jVersion.value changing(),
-    "org.nd4j" % "nd4j-native-platform" % nd4jVersion.value % Test changing(),
+    "org.nd4j" % "nd4j-api" % nd4jVersion.value,
     "org.scalatest" %% "scalatest" % "2.2.6" % Test,
     "ch.qos.logback" % "logback-classic" % "1.2.1" % Test,
+    "org.nd4j" % "nd4j-native" % nd4jVersion.value % Test classifier nd4jClassifier,
     "org.scalacheck" %% "scalacheck" % "1.12.5" % Test,
     "org.scalanlp" %% "breeze" % "0.12" % Test,
     "com.github.julien-truffaut" %% "monocle-core" % "1.2.0" % Test
@@ -77,6 +97,8 @@ lazy val commonSettings = Seq(
 )
 
 lazy val publishNexus = Seq(
+  dependencyClasspath in Compile ++=
+    update.value.select(configurationFilter("publishing")),
   publishTo := {
     val nexus = "http://master-jenkins.skymind.io:8088//"
     if (isSnapshot.value)
@@ -87,6 +109,8 @@ lazy val publishNexus = Seq(
 )
 
 lazy val publishJfrog = Seq(
+  dependencyClasspath in Compile ++=
+    update.value.select(configurationFilter("publishing")),
   publishTo := {
     val jfrog = "http://master-jenkins.skymind.io:8081/artifactory/"
     if (isSnapshot.value)
@@ -97,6 +121,8 @@ lazy val publishJfrog = Seq(
 )
 
 lazy val publishBintray = Seq(
+  dependencyClasspath in Compile ++=
+    update.value.select(configurationFilter("publishing")),
   publishTo := {
     val jfrog = "https://oss.jfrog.org/artifactory/"
     if (isSnapshot.value)
@@ -107,6 +133,8 @@ lazy val publishBintray = Seq(
 )
 
 lazy val publishSonatype = Seq(
+  dependencyClasspath in Compile ++=
+    update.value.select(configurationFilter("publishing")),
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
